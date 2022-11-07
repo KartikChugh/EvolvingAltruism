@@ -16,7 +16,7 @@ public class Goal extends Entity {
     }
 
     @Override
-    protected int getDiameter() {
+    public int getDiameter() { // Jenetics: made public
         return 15;
     }
 

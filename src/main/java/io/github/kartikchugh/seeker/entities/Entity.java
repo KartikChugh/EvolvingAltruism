@@ -44,11 +44,11 @@ public abstract class Entity implements Drawable {
         this.posY += posY;
     }
 
-    private double getCenterX() {
+    public double getCenterX() {
         return posX + getDiameter()/2.0;
     }
 
-    private double getCenterY() {
+    public double getCenterY() {
         return posY + getDiameter()/2.0;
     }
 

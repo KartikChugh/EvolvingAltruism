@@ -5,11 +5,14 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import io.github.kartikchugh.seeker.entities.Entity;
 import io.github.kartikchugh.seeker.entities.Goal;
 import io.github.kartikchugh.seeker.entities.Population;
 import io.jenetics.DoubleChromosome;
@@ -50,6 +53,9 @@ public class SeekerPanel extends JPanel {
     private final Population population;
     private int gen = 0;
 
+    // Jenetics
+    private static final double MAX_VELOCITY = 7.0;
+
     SeekerPanel(int size) {
         initGUI(size);
         GENOME_LENGTH = (int)(0.3 * HEIGHT);
@@ -84,10 +90,67 @@ public class SeekerPanel extends JPanel {
         System.out.println("===================");
     }
 
+    private static double clamp(double num) {
+        return Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, num));
+    }
+
+    private static int getDiameter() {
+        return 4;
+    }
+
+    final static double squareDistanceFrom(Entity o, double posX, double posY) {
+        final double dx = getCenterX(posX) - o.getCenterX();
+        final double dy = getCenterY(posY) - o.getCenterY();
+        return dx*dx + dy*dy;
+    }
+
+    private static double getCenterX(double posX) {
+        return posX + getDiameter()/2.0;
+    }
+
+    private static double getCenterY(double posY) {
+        return posY + getDiameter()/2.0;
+    }
+
     private static double eval(Genotype<DoubleGene> gt) {
-        return gt.chromosome()
-            .as(DoubleChromosome.class)
-            .doubleStream().sum();
+        List<Double> directions = gt.chromosome()
+        .as(DoubleChromosome.class)
+        .doubleStream()
+        .boxed()
+        .collect(Collectors.toList());
+
+        double velX = 0;
+        double velY = 0;
+
+        double posX = 0;
+        double posY = 0;
+
+        for (int i = 0; i < directions.size(); i++) {
+            double accX = Math.cos(Math.toRadians(directions.get(i)));
+            double accY = Math.sin(Math.toRadians(directions.get(i)));
+
+            velX += accX;
+            velY += accY;
+
+            velX = clamp(velX);
+            velY = clamp(velY);
+
+            posX += velX*DT*65;
+            posY += velY*DT*65;
+        }
+
+        double minDist = (getDiameter() + goal.getDiameter())/2.0;
+        double minDistCost = minDist*minDist;
+
+        final double distCost = Math.max(squareDistanceFrom(goal, posX, posY), minDistCost);
+        //final double stepCost = steps*steps;
+
+        double fitness = 1/distCost;
+        // if (reachedGoal) {
+        //     fitness += 10000/stepCost;
+        // }
+
+        return fitness;
     }
 
     private void initGUI(int size) {
