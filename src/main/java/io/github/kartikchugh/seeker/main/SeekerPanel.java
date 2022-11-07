@@ -1,12 +1,25 @@
 package io.github.kartikchugh.seeker.main;
 
-import io.github.kartikchugh.seeker.entities.Goal;
-import io.github.kartikchugh.seeker.entities.Population;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.util.Random;
+
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+import io.github.kartikchugh.seeker.entities.Goal;
+import io.github.kartikchugh.seeker.entities.Population;
+import io.jenetics.DoubleChromosome;
+import io.jenetics.DoubleGene;
+import io.jenetics.Genotype;
+import io.jenetics.Phenotype;
+import io.jenetics.engine.Engine;
+import io.jenetics.engine.EvolutionResult;
+import io.jenetics.engine.EvolutionStatistics;
+import io.jenetics.util.Factory;
 
 public class SeekerPanel extends JPanel {
 
@@ -50,6 +63,31 @@ public class SeekerPanel extends JPanel {
         t = System.currentTimeMillis();
         final Timer timer = new Timer(1000/TPS_DESIRED, this::tick);
         timer.start();
+
+        // Jenetics
+        Factory<Genotype<DoubleGene>> gtf = Genotype.of(DoubleChromosome.of(0, 360, GENOME_LENGTH));
+
+        Engine<DoubleGene, Double> engine = Engine
+            .builder(SeekerPanel::eval, gtf)
+            .populationSize(POPULATION_SIZE)
+            .build();
+        
+        engine.stream()
+            .limit(10)
+            .peek(SeekerPanel::update)
+            .collect(EvolutionResult.toBestPhenotype());
+    }
+
+    private static void update(final EvolutionResult<DoubleGene, Double> result) {
+        System.out.println("Generation: " + result.generation());
+        System.out.println(result.bestPhenotype());
+        System.out.println("===================");
+    }
+
+    private static double eval(Genotype<DoubleGene> gt) {
+        return gt.chromosome()
+            .as(DoubleChromosome.class)
+            .doubleStream().sum();
     }
 
     private void initGUI(int size) {
