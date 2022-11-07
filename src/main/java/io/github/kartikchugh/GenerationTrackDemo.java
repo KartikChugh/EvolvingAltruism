@@ -32,6 +32,7 @@ public class GenerationTrackDemo {
 
         Engine<BitGene, Integer> engine = Engine
             .builder(GenerationTrackDemo::eval, gtf)
+            .populationSize(5)
             .build();
 
         Phenotype<BitGene, Integer> result = engine.stream()
