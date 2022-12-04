@@ -134,7 +134,7 @@ public class SeekerPanel extends JPanel {
         
         Engine<DoubleGene, Double> engine = Engine
             .builder(SeekerPanel::eval, gtf)
-            .optimize(Optimize.MAXIMUM)
+            .optimize(Optimize.MINIMUM)
             .populationSize(POPULATION_SIZE)
             .build();
 
