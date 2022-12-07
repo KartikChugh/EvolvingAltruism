@@ -8,6 +8,7 @@ import io.jenetics.DoubleGene;
 import io.jenetics.Genotype;
 import io.jenetics.Optimize;
 import io.jenetics.Phenotype;
+import io.jenetics.RouletteWheelSelector;
 import io.jenetics.engine.Engine;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.stat.MinMax;
@@ -134,11 +135,12 @@ public class SeekerPanel extends JPanel {
         
         Engine<DoubleGene, Double> engine = Engine
             .builder(SeekerPanel::eval, gtf)
+            .selector(new RouletteWheelSelector<>())
             .optimize(Optimize.MINIMUM)
             .populationSize(POPULATION_SIZE)
             .build();
 
-        var results = engine.stream().limit(10).toList();
+        var results = engine.stream().limit(20).toList();
         RESULTS = results;
 
         var pop = results.get(0).population().stream().toList();

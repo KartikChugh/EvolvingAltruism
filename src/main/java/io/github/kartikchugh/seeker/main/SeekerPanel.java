@@ -78,10 +78,10 @@ public class SeekerPanel extends JPanel {
             .populationSize(POPULATION_SIZE)
             .build();
         
-        engine.stream()
+/*         engine.stream()
             .limit(10)
             .peek(SeekerPanel::update)
-            .collect(EvolutionResult.toBestPhenotype());
+            .collect(EvolutionResult.toBestPhenotype()); */
     }
 
     private static void update(final EvolutionResult<DoubleGene, Double> result) {
