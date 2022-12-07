@@ -5,6 +5,7 @@ import io.jenetics.BitGene;
 import io.jenetics.Genotype;
 import io.jenetics.Phenotype;
 import io.jenetics.engine.Engine;
+import io.jenetics.engine.Evaluator;
 import io.jenetics.engine.EvolutionResult;
 import io.jenetics.engine.EvolutionStatistics;
 import io.jenetics.util.Factory;
@@ -17,6 +18,8 @@ public class GenerationTrackDemo {
         System.out.println("Generation: " + result.generation());
         System.out.println(result.population());
         System.out.println("===================");
+
+        //result.
     }
 
     private static int eval(Genotype<BitGene> gt) {
@@ -28,19 +31,32 @@ public class GenerationTrackDemo {
     public static void main(String[] args) {
 
         Factory<Genotype<BitGene>> gtf =
-            Genotype.of(BitChromosome.of(8, 0.25));
+            Genotype.of(BitChromosome.of(8, 0.5));
 
-        Engine<BitGene, Integer> engine = Engine
+/*         Engine<BitGene, Integer> engine = Engine
             .builder(GenerationTrackDemo::eval, gtf)
             .populationSize(5)
-            .build();
+            .build(); */
 
-        Phenotype<BitGene, Integer> result = engine.stream()
+        Evaluator<BitGene, Integer> evaluator = population -> 
+            population.map(pt -> {
+                int count = pt.genotype().chromosome().as(BitChromosome.class).bitCount();
+                if (count % 2 == 1) {
+                    return pt.withFitness(10);
+                } else {
+                    return pt.withFitness(count);
+                }
+            }).asISeq();
+
+        Engine<BitGene, Integer> engine = new Engine.Builder<>(evaluator, gtf).build();
+
+        /* Phenotype<BitGene, Integer> result =  */engine.stream()
             .limit(3)
-            .peek (GenerationTrackDemo::update)
-            .collect(EvolutionResult.toBestPhenotype());
+            .forEach(er -> System.out.println(er.bestFitness()));
+/*             .peek (GenerationTrackDemo::update)
+            .collect(EvolutionResult.toBestPhenotype()); */
  
-        System.out.println(result);
+        //System.out.println(result);
 
     }
 
